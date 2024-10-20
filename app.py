@@ -162,5 +162,25 @@ def register_user():
     return jsonify({"message": "User registered successfully!"}), 201  # Created
 
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    # Check if email and password are present in the request
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({"message": "Email and password are required"}), 400
+
+    # Query MongoDB for a user with the given email and password
+    existing_user = users_collection.find_one({"email": email, "password": password})
+
+    if existing_user:
+        return jsonify({"message": "Login Successful."}), 200
+    else:
+        return jsonify({"message": "Invalid email or password"}), 401
+
+
 if __name__ == '__main__':
     app.run(debug=True)
