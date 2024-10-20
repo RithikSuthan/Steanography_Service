@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 import random
+
+from pymongo import MongoClient
 from stegano import lsb  # Use the stegano library for embedding messages in images
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -11,6 +13,10 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 CORS(app)
 
+
+mongo_client = MongoClient("mongodb+srv://Rithik_Suthan_S:8098329762@cluster0.nwyrzl2.mongodb.net/steanography")
+db = mongo_client["steanography"]  # Replace with your database name
+users_collection = db["users"]  # Collection for storing user data
 
 @cross_origin()
 @app.route('/sendotp', methods=['POST'])
@@ -123,6 +129,37 @@ def extract_otp_from_image(image_path):
     except Exception as e:
         print(e)
         return None
+
+
+from flask import request, jsonify
+import random
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    data = request.get_json()  # Get JSON data from the request
+
+    name = data.get('name')
+    email = data.get('email')
+    friends = data.get('friends')  # OTP if needed
+    password =data.get('password')
+
+    # Check if user already exists
+    existing_user = users_collection.find_one({"email": email})
+    if existing_user:
+        return jsonify({"message": "User already exists."}), 409  # Conflict
+
+    # Create a new user document
+    new_user = {
+        "name": name,
+        "email": email,
+        "friends": friends,
+        "password":password
+    }
+
+    # Insert the new user into the database
+    users_collection.insert_one(new_user)
+
+    return jsonify({"message": "User registered successfully!"}), 201  # Created
 
 
 if __name__ == '__main__':
