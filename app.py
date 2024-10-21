@@ -97,6 +97,8 @@ def send_email_with_image(sender_email, send_to_email, subject, message, image_p
     finally:
         server.quit()
 
+UPLOAD_FOLDER = 'uploads/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/verifyotp', methods=['POST'])
 def verify_otp_route():
